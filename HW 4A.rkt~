@@ -1,0 +1,57 @@
+#lang lsl
+
+;; Problem 1
+(define-contract PosInt (Immediate (check (lambda (x) (and (integer? x) (> x 0))))
+                                   (generate (lambda (fuel) (random 1 (add1 fuel))))))
+
+(: duplicate-element-prop (-> (List PosInt) True))
+(define (duplicate-element-prop lopi) (local [(define out (duplicate-element lopi))
+                                              (define (count num lon) (cond [(empty? lon) 0]
+                                                                            [(cons? lon) (if (= (first lon) num)
+                                                                                             (+ 1 (count num (rest lon)))
+                                                                                             (count num (rest lon)))]
+                                                                            [else "idk why the code breaks without this else branch"]))]
+                                             (if (or (>= (count out lopi) 2) (= out -1))
+                                                 #t
+                                                 #f)))
+(define (count num lon) (cond [(empty? lon) 0]
+                              [(cons? lon) (if (= (first lon) num)
+                                               (+ 1 (count num (rest lon)))
+                                               (count num (rest lon)))]
+                              [else "idk why the code breaks without this else branch"]))
+
+(: duplicate-element (-> (List PosInt) Integer))
+;Purpose: Given a list of positive integers, if there exists at least one that appears more than once,
+;         returns one of those repeated integers.
+;         If there are no duplicates, returns -1 
+(define (duplicate-element lopi) (local [(define sorted (sort lopi >))
+                                         (define (duplicate-element-help lopi curNum count)
+                                           (cond [(= count 2) curNum] 
+                                                 [(empty? lopi) -1]
+                                                 [(cons? lopi) (if (= (first lopi) curNum)
+                                                                   (duplicate-element-help (rest lopi) curNum (add1 count))
+                                                                   (duplicate-element-help (rest lopi) (first lopi) 1))]))]
+                                  (if (empty? lopi)
+                                      -1
+                                      (duplicate-element-help sorted (first lopi) 0))))
+
+;Test
+(check-contract duplicate-element-prop 1000)
+
+
+
+
+
+
+
+;; Problem 2
+
+(define (common-element-prop ...) ...)
+
+(define (common-element ...) ...)
+
+;; Problem 3
+
+(define (pair-with-sum-prop ...) ...)
+
+(define (pair-with-sum ...) ...)

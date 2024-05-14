@@ -1,0 +1,67 @@
+#lang lsl
+
+;; Problem 1:
+;;
+;; A (height) balanced binary tree has a difference in height of the
+;; left and right subtrees of at most 1, where height is the longest path to a leaf. Importantly,
+;; this property (or _invariant_) must be mantained when inserting and removing elements
+;; from the tree.
+;;
+;; Your task: define `balanced-prop` as a predicate.
+;; You should test your property on several example trees using `check-expect`.
+;; You're welcome to use the example trees we provide as some of your tests, but
+;; you should also define some of your own.
+
+
+;; part p1-a
+(define-struct leaf [value])
+(define-struct node [left right])
+(define-contract (Tree X) (OneOf (Leaf X) (Node (Tree X) (Tree X))))
+;; part p1-a
+
+;; part p1-b
+(define T1 (make-node (make-node (make-leaf 2)
+                                 (make-leaf 3))
+                      (make-leaf 4)))
+;; part p1-b
+
+;; part p1-c
+(define T2 (make-node (make-node (make-node (make-leaf 1)
+                                            (make-leaf 2))
+                                 (make-leaf 3))
+                      (make-leaf 4)))
+;; part p1-c
+
+;; part p1-d
+(define T3 (make-node (make-node (make-leaf 1)
+                                 (make-leaf 2))
+                      (make-node (make-leaf 3)
+                                 (make-leaf 4))))
+;; part p1-d
+(: balanced-prop (-> (Tree Integer) True))
+(define (balanced-prop t) (local [(define (longest-path t) (cond [(leaf? t) 0]
+                                                                 [(node? t)
+                                                                  (max (add1 (longest-path (node-left t)))
+                                                                       (add1 (longest-path (node-right t))))]))
+                                  (define longest-path-left (if (node? t)
+                                                                (longest-path (node-left t))
+                                                                0))
+                                  (define longest-path-right (if (node? t)
+                                                                (longest-path (node-right t))
+                                                                0))]
+                            (and (<= (abs (- longest-path-left longest-path-right)) 1)
+                                 (if (node? t)
+                                     (balanced-prop (node-left t))
+                                     #t)
+                                 (if (node? t)
+                                     (balanced-prop (node-right t))
+                                     #t)))) 
+
+
+(check-expect (balanced-prop T1) #t)
+;(check-expect (balanced-prop T2) #f)
+(check-expect (balanced-prop T3) #t) 
+(check-expect (balanced-prop (make-node T1 T3)) #t)
+(check-expect (balanced-prop (make-node T3 T1)) #t)
+;(check-expect (balanced-prop (make-node (make-node T1 (make-node T1 (make-leaf 5))) T1)) #f)
+;; ...

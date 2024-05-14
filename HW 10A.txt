@@ -1,0 +1,111 @@
+Logic and Computation HW 10A: PBT library in a programming language used outside of CS2800
+
+
+Problem 1: I have chosen python as the programming language, and a popular library that allows support for PBT in python is called Hypothesis
+
+
+Problem 2: Strengths and weaknesses of the Hypothesis library
+
+
+The hypothesis library in python allows you to quickly write property tests when given the strategy/strategies to produce the inputs of the type that you want to be given to your “prop” test function. The way that this works is by using a decorator in python (a function that wraps another function to extend its behavior), called “given” which the hypothesis library provides us. This makes it easy to specify the types of inputs to be generated to run the property tests, since python has no type system to contractually check the types of inputs given to a function. As parameters to the “given” decorator, we provide “strategies” to generate inputs. The simplest strategies can be found from the strategies module, that allows you to provide your test function random inputs of types integer (with given min/max values), alphabets (many parameters can be used to specify which types of letters, but this is used for single-character texts only), text (again, many ways to specify/restrict which types of text/strings), dates (given min/max dates), lists (of specified type), etc.
+
+Some examples of tests, which I have taken from HW examples are: 
+
+@given(st.text(min_size=0, max_size=100))
+def cyclic_shuffle_prop(s):
+    shuffle = cyclic_shuffle(s)
+    assert shuffle in s+s, f"{shuffle} is the output, and doesn't satisfy invariant"
+
+Where @given(….) is the decorator for cyclic_shuffle_prop
+
+st.text(…) is the strategy given from the module hypothesis.strategies, which I imported as st for ease of reading/writing.
+
+In this example, I am ensuring that the function cyclic shuffle, given a string of length 0 to 100 inclusive (called s), must return a string that is contained by s+s. So cyclic shuffle of “abc” is contained by “abcabc” The code f"{shuffle} is the output, and doesn't satisfy invariant”, is just a way to make error messages a bit more readable and customizable. 
+
+
+@given(st.integers(), st.integers(), st.integers())
+def test_exclusive_range(n, lo, hi):
+    maybe_valid = exclusive_range(n, lo, hi)
+    if (maybe_valid):
+        assert n>lo and n<hi, f"output {maybe_valid} does not satisfy invariant"
+    else: 
+        assert n<=lo or n>= hi, f"output {maybe_valid} does not satisfy invariant"
+
+In this example, I provide 3 integers to the exclusive_range function, lo, hi and n, the number we are checking to be in between but not equal to lo and hi. If maybe_valid is true, then we assert that n is in fact in between lo and hi (>lo and <hi) else we assert that indeed n is out of the range (lo, hi).
+
+
+The many different types of strategies that come inbuilt with the hypothesis.strategies module can make generating simple inputs with specific restrictions easy. It also allows more advanced generation of examples. For example, you can map generated inputs of a base type, ie. Integers, onto another type, by applying a function to the integer. So if, for examples you require a sorted list of integers as your input, you can generate lists of integers, and you can map a sorting function over the generated lists of integers to generate sorted lists. 
+
+Additionally, you can filter over examples generated, and reject examples that you think don’t satisfy a particular predicate. For example, the following code generates inputs of integers that are strictly greater than 100, and ensures that a function called “greater_than_100” works as expected, ie always returns true when input greater than 100.
+
+@given(st.integers().filter(lambda x: x > 100))
+def test_greaterThan100_true(n):
+	assert greaterThan100(n) == True
+
+And similarly we can test the opposite holds (when input < 100, always returns false)
+
+@given(st.integers().filter(lambda x: x < 100))
+def test_greaterThan100_false(n):
+	assert greaterThan100(n) == False
+
+The “given” decorator then converts the original test function into a 0 argument function that runs the original function over random inputs of specified type. Therefore to run the test programmatically, you can simply call the test function with no arguments, or you can run “pytest” from the terminal in the directory that contains the test (make sure that the name of the file and the testing function begins with “test_”)
+
+So, you can run:
+test_greaterThan100_true() 
+And if run successfully, will not output any error, else will output the falsifying example. 
+
+
+We can also use the hypothesis library to run roundtrip tests: 
+
+@given(st.characters(categories = ["Ll"]))
+def test_roundtrip(str):
+    assert decode(encode(str)) == str
+
+Where st.characters(…) generates lowercase letters only (specified by UTF character set “Ll”), and test_roundtrip asserts that for the generated lowercase letters, encoding, then decoding a letter, returns that letter itself. 
+
+
+However, one of the drawbacks of this library is that it only works similar to check-contract in racket, ie. it generates random examples and runs them against the code, but it is not exhaustive testing, and so if your code breaks for a specific large input, it is likely that hypothesis won’t catch the error. It doesn’t use a SAT solver or similar mechanisms to test exhaustively. 
+
+So if you have a function,
+
+def add1(n):
+	if (n == 78987):
+		return 78987
+	else: 
+		return n + 1
+
+@given(st.integers())
+def test_add1(n):
+	assert add1(n) ==  (1 + n)
+
+	
+The test_add1 function will likely not catch the error for the input n = 78987, where add1 incorrectly returns 78987 instead of 78988, because the add1 function only fails on that specific large example, which is unlikely to be run by hypothesis.
+
+
+Another drawback which is a bit more specific to the language than the testing library is that functions don’t have contracts/signatures, and so we must create them manually through given. Although hypothesis does provide a lot of options to customize your inputs, it is time-taking to write the given decorator such that it produces the specific inputs that you want, and you may end up spending more time on getting the correct inputs generated than actually writing down the invariant/property that must be satisfied, which is unfortunate. For examples, generating strings/text is not very straightforward, as you need to specific which UTF character sets are included in the text, and min and max text size, which is generally not something you really need to worry about in Racket with check-contract. While this does allow us to provide detailed information about which types of strings to generate, it does not allow you to quickly get some String inputs.
+
+
+
+Problem 3:
+Incorporating the hypothesis library can help test the code that we generate more fully and completely when compared to the standard method of unit testing, which only checks the function you are testing against singular points of input/output pairs. With hypothesis, we can specify a range of inputs which we can restrict to a specific type of input that we care about for the function in question. For this range of inputs, we can assert invariants about the function for any randomly generated input of the specified type. This way, our testing can be done much more comprehensively, as we will be able to check if our functions behaves the way we expect it to over very large numbers of inputs of a given type, rather than having singular checks or points of confirmation. The benefit with this is that we can still run unit tests as we currently do for expected points of potential failure/edge cases, but can also additionally use hypothesis to automatically test 1000s of random inputs quickly. 
+
+The drawback with hypothesis property testing due to python’s lack of a type system is that it may be time consuming to actually specify the type information for the inputs of the function we are testing. Unit tests are quick and simple to write, and can reasonably let us know how the function behaves, even though it is not thorough. But hypothesis-testing can take a long time to write correctly, and may not end up catching any errors that the unit tests haven’t already, even though they test more inputs.
+
+However, for crucial programs where we must ensure that the function behaves correctly as per specifications, it is still worth the time and effort needed to write down hypothesis-based property tests, as it will work as a final check to give programmers high confidence about the code that is written, as it almost ensures that the code will never fail, especially on small inputs, even though it does not run every single possible input to the function. Additionally, when it does find an error in a function, the library does a very good job in reducing the input to the smallest possible size to replicate the error, which is very useful when programmers go back to fix the code, as it makes it simple to trace the code and see where and why it fails. 
+
+Therefore, I believe that we must implement the hypothesis library in our projects, which can ensure that code runs according to specifications for a wide array of inputs. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

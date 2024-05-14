@@ -1,0 +1,54 @@
+#lang lsl
+
+;; Problem 1
+(: cyclic-shuffle-prop (-> String True))
+;Pupose: Formal specification of cyclic-shuffle-prop
+(define (cyclic-shuffle-prop s) (local
+                                  [(define master (string-append s s))
+                                   (define output (cyclic-shuffle s))]
+                                  (and (= (string-length output)
+                                          (string-length s))
+                                       (string-contains? master output))))
+
+
+
+(: cyclic-shuffle (-> String String))
+;Purpose: Takes a string and shifts its contents a random number of places
+;         i.e., moving a character from the end to the beginning
+(define (cyclic-shuffle s) (local
+                             [(define randStartIndex (random 0 (string-length s)))]
+                             (string-append
+                              (substring s randStartIndex (string-length s))
+                              (substring s 0 randStartIndex))))
+
+
+;Test (easier to test with formal spec as it does the legwork of ensuring that strings of large lengths all adhere to specs)
+(check-contract cyclic-shuffle-prop)
+
+
+
+
+;; Problem 2
+
+(: gcd (-> Natural Natural Natural))
+;Purpose: Finds the greatest common divisor of 2 given numbers
+;         (returns the largest natural number that divides both inputs)
+(define (gcd x y) (gcd x y))
+
+(: gcd-prop (-> Natural Natural True))
+; Purpose: Formal spec for gcd function
+(define (gcd-prop x y) (local
+                         [(define out (gcd x y))
+                          (define lon (list))]
+                         (and (= (modulo x gcd) 0)
+                              (= (modulo y gcd) 0)
+                              (and (lambda (z) (not (and (= (modulo x z) 0)
+                                                         (= (modulo y z) 0)))) (range gcd (min x y))))))
+
+(check-contract gcd-prop)
+
+;; Problem 3
+
+(define (find-majority-prop ...) ...)
+
+(define (find-majority ...) ...)

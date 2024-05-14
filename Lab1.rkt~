@@ -1,0 +1,29 @@
+#lang lsl
+(define-struct leaf [])
+(define-struct node [k v l r])
+(define-contract (Tree K V) (OneOf (Leaf) (Node K V (Tree K V) (Tree K V))))
+
+
+
+(define-struct sop [empty singleton union intersect member?])
+(define-contract (Sop~ Set Elt) (Sop Set
+                                     (-> Elt Set)
+                                     (-> Set Set Set)
+                                     (-> Set Set Set)
+                                     (-> Elt Set Boolean)))
+
+
+;Returns a list of all elements common to both lists l1 and l2
+(define (intersect l1 l2 common) (cond [(empty? l1) common]
+                                       [(list? l1) (if (member? (first l1) l2)
+                                                       (intersect (rest l1) l2 (cons (first l1) common))
+                                                       (intersect (rest l1) l2 common))]))
+
+
+
+(define SOP-LIST (make-sop '()
+                           (lambda (x) (list x))
+                           (lambda (x y) (append x y))
+                           (lambda (x y) (intersect x y '()))
+                           (lambda (x y) (member? x y))))
+

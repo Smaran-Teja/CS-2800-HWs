@@ -1,0 +1,159 @@
+#lang lsl
+
+;; Problem 1
+
+;; part p1
+(define-struct tv [T F AND OR NOT])
+
+(define-contract (TruthVal A) (Tv A
+                                  A
+                                  (-> A A A)
+                                  (-> A A A)
+                                  (-> A A)))
+;; part p1
+
+
+;; part p1a
+(: BOOL-TV (TruthVal Boolean))
+(define BOOL-TV (make-tv #t #f (lambda (x y) (and x y)) (lambda (x y) (or x y)) (lambda (x) (not x))))
+;; part p1a
+
+
+;; Problem 2:
+
+
+;; part p2
+(define-contract Variable Natural)
+
+(define-struct n (var))
+;; a negated variable
+
+(define-contract VariableClause (OneOf Variable (N Variable)))
+;; a Variable is either a natural number or a negated one
+
+(define-contract (Formula V) (List V))
+(define-contract (CNF V) (List (Formula V)))
+
+;; part p2
+
+
+;; part p2b
+(: variable-upper-bound (-> (CNF VariableClause) Variable))
+(define (variable-upper-bound cnf) ...)
+;; part p2b
+
+;; Problem 3:
+
+;; part p3
+(: eval (All (A) (-> (TruthVal A)
+                     (CNF A)
+                     A)))
+(define (eval api cnf)
+  ...)
+
+(test-suite
+ "eval"
+
+ (check-expect (eval BOOL-TV ...) ...)
+
+ )
+
+;; part p3
+
+
+;; Problem 4:
+
+;; part p4
+(: subst (All (A) (-> (TruthVal A)
+                      (List (Tuple Variable A))
+                      (CNF VariableClause)
+                      (CNF A))))
+(define (subst api vars cnf)
+  ...)
+
+(test-suite
+ "subst"
+
+(check-expect (subst BOOL-TV ...)
+              ...)
+
+)
+
+;; part p4
+
+;; Problem 5:
+
+;; part p5
+(: all-tvs (All (X) (-> X
+                        X
+                        Variable
+                        (List (List (Tuple Variable X))))))
+(define (all-tvs T F n)
+  (local ((define (all-tvs-local n)
+          (cond
+            [(zero? n) '(())]
+            [else
+             (let ([xs (all-tvs-local (sub1 n))]) 
+               (append (map (Î» (x) (cons (list (sub1 n) T) x)) xs)
+                       (map (Î» (x) (cons (list (sub1 n) F) x)) xs)))])))
+    (map reverse (all-tvs-local n)))) 
+
+(test-suite
+ "all-tvs"
+(check-expect (all-tvs "a" "b" 3)
+              '(((0 "a") (1 "a") (2 "a"))
+                ((0 "b") (1 "a") (2 "a"))
+                ((0 "a") (1 "b") (2 "a"))
+                ((0 "b") (1 "b") (2 "a"))
+                ((0 "a") (1 "a") (2 "b"))
+                ((0 "b") (1 "a") (2 "b"))
+                ((0 "a") (1 "b") (2 "b"))
+                ((0 "b") (1 "b") (2 "b"))))
+              
+)
+
+(: sat (All (A) (-> (TruthVal A)
+                    (CNF VariableClause)
+                    A)))
+(define (sat api cnf) ...)
+
+(test-suite
+ "sat"
+ (check-expect (sat BOOL-TV ...) ...)
+
+ )
+
+;; part p5
+
+
+;; Problem 6:
+
+;; part p6
+
+(: ONEZERO-TV (TruthVal (OneOf (Constant 0) (Constant 1))))
+(define ONEZERO-TV ...)
+
+(: STRING-TV (TruthVal String))
+(define STRING-TV (make-tv ...))
+
+(define-struct true ())
+(define-struct false ())
+
+(: STRUCT-TV (TruthVal (OneOf (True) (False))))
+(define STRUCT-TV (make-tv ...))
+
+
+(: LAMBDA-TV (TruthVal (All (X) (-> X X X))))
+(define LAMBDA-TV (make-tv ...))
+
+(test-suite
+ "sat-other"
+ (check-expect (sat ONEZERO-TV ...) ...)
+
+ (check-expect (sat STRING-TV ...) ...)
+
+ (check-expect (sat STRUCT-TV ...) ...)
+
+ (check-expect (sat LAMBDA-TV ...) ...)
+)
+;; part p6

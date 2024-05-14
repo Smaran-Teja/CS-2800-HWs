@@ -1,0 +1,32 @@
+#lang lsl
+
+;; Problem 1
+(: exclusive-range? (-> Integer Integer Integer Boolean))
+(define (exclusive-range? lo hi n) (cond [(and (> n lo) (< n hi)) #t]
+                                         [else #f]))
+(check-contract exclusive-range?)
+
+(: exclusive-range?-prop (-> Integer Integer True))
+(define (exclusive-range?-prop n1 n2) (local
+                                        [(define lo (if (< n1 n2) n1 n2))
+                                         (define hi (if (<= n1 n2) n2 n1))]
+                                        (if (< (abs (- n2 n1)) 2) 
+                                            #t
+                                            (exclusive-range? lo hi (random (add1 lo) hi)))))
+
+(check-contract exclusive-range?-prop 100000)
+
+;; Problem 2
+(define-contract Odd (not even?))
+
+
+(: double-plus1 (-> Odd Odd))
+(define (double-plus1 x) (+ (* 2 x) 1))
+
+;; Problem 3
+
+(define (divisible-by-3-or-5? ...) ...)
+
+(define-contract Divis3or5 ...)
+
+(define (divide-3-or-5 ...) ...)

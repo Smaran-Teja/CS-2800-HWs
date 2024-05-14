@@ -1,0 +1,64 @@
+#lang lsl
+
+;; Problem 1
+
+;; part p1a
+(define STARTBAL 1000)
+(define MAX-TRANSFERS 20)
+
+(define-struct bank-state-v1 (balance num-transfers other-banks))
+(define-contract BS1 (BankStateV1 Natural Natural (List String)))
+
+(define-struct transfer (bal))
+(define-contract Transfer~ (Transfer Natural))
+;; part p1a
+
+;; part p1b
+(: bank-start-v1 (-> (List String) (Action BS1)))
+(define (bank-start-v1 others) (local [(define others-exist? (= (length others) 0))
+                                       (define rand-other-bank (if others-exist?
+                                                                   -1
+                                                                   (random (length others))))
+                                       (define msg (if others-exist?
+                                                       (list-ref others )))]))
+;; part p1b
+
+;; part p1c
+(: bank-receive-v1 (-> BS1 (ReceivePacket Transfer~) (Action BS1)))
+(define (bank-receive-v1 st pkt) ...)
+;; part p1c
+
+;; part p1d
+(define (bank-process-v1 nm) ...)
+;; part p1d
+
+;; part p1e
+(define (bank-v1) ...)
+;; part p1e
+
+
+;; Problem 2
+
+;; part p2a
+(define UNTIL-SNAPSHOT 10)
+
+(define-struct bank-state (balance num-transfers other-banks snapshot ignored))
+(define-contract BS (BankState Natural Natural (List String) (Maybe Natural) (List String)))
+
+(define-struct marker ())
+
+(define-contract Message (OneOf Transfer~ (Marker)))
+;; part p2a
+
+
+;; part p2b
+(: bank-start (-> (List String) (Action BS)))
+(define (bank-start others) ...)
+
+(: bank-receive (-> BS (ReceivePacket Message) (Action BS)))
+(define (bank-receive st pkt) ...)
+
+(define (bank-process nm) ...)
+
+(define (bank) ...)
+;; part p2b

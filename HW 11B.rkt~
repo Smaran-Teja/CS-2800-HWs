@@ -1,0 +1,43 @@
+#lang racket
+
+(require lsl/performance)
+
+;; Problem 1
+
+;; part p1a
+(define (min-list l)
+  (if (empty? l)
+      #f
+      (if (or (boolean? (min-list (rest l)))
+              (< (first l) (min-list (rest l))))
+          (first l)
+          (min-list (rest l)))))
+
+
+(visualize (build-list 10 (lambda (n) (* n 700000))) min-list)
+;; part p1a
+
+;; Problem 2
+
+;; part p2a
+(define (maybe-second l)
+  (if (>= (length l) 2)
+      (first (rest l))
+      #f))
+;; part p2a
+
+;; Problem 3
+
+;; part p3a
+(define (list-reverse l)
+  (cond [(empty? l) empty]
+        [(cons? l) (append (list-reverse (rest l)) (list (first l)))]))
+;; part p3a
+
+;; Problem 4
+
+;; part p4a
+(define (fib n)
+  (cond [(<= n 1) 1]
+        [else (+ (fib (- n 1)) (fib (- n 2)))]))
+;; part p4a

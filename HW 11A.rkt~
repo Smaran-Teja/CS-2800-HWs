@@ -1,0 +1,69 @@
+#lang lsl
+;; part p0
+(define-struct cell (free? value))
+(define-contract Cell~ (Cell Boolean Any))
+
+(define-struct memory (pos cells))
+(define-contract Memory~ (Memory Natural (List Cell~)))
+
+(define MEMORYSIZE 100)
+
+(define MEMORY
+  (make-memory 0 (build-list MEMORYSIZE (lambda (_) (make-cell #t 0)))))
+;; part p0
+
+
+;; Problem 1
+
+;; part p1
+(: malloc (-> (Maybe Cell~)))
+(define (malloc)
+  (if (< (memory-pos MEMORY) MEMORYSIZE)))
+;; part p1
+
+
+;; Problem 2
+
+;; part p2
+(: free (-> Cell~ False))
+(define (free c)
+  ...)
+;; part p2
+
+;; Problem 3
+
+;; part p3
+(: defrag (-> False))
+(define (defrag)
+  ...)
+;; part p3
+
+
+;; Problem 4
+
+;; part p4a
+(define (*= c v)
+  (set-cell-value! c v))
+
+(define (deref c) (cell-value c))
+
+(: for-loop (-> Cell~ Natural (-> Any) False))
+(define (for-loop idx bound body)
+  (if (>= (cell-value idx) bound)
+      #f
+      (begin (body)
+             (set-cell-value! idx (add1 (cell-value idx)))
+             (for-loop idx bound body))))
+;; part p4a
+
+
+;; part p4b
+(: fib (-> Natural (Maybe Natural)))
+(define (fib n)
+  ...)
+;; part p4b
+
+
+;; Problem 5
+;;
+;; Add contracts above, no code down here.

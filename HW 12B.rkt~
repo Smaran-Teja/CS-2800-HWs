@@ -1,0 +1,62 @@
+#lang lsl
+
+(define-struct affine-error (v))
+(define-struct affine-container (thk))
+(define (affine v)
+  (let ([a #f])
+    (make-affine-container
+      (lambda ()
+        (if a
+            (raise (make-affine-error v))
+            (begin (set! a #t)
+                   v))))))
+
+
+(define (affine-get a)
+  ((affine-container-thk a)))
+
+(define-contract (Single T)
+  (Immediate (check affine-container?)
+             (generate (lambda (fuel)
+                         (affine (contract-generate T fuel))))))
+
+;; part p0a
+(define-struct item (name))
+(define-contract Item~ (Item String))
+;; part p0a
+
+;; part p0b
+
+(define-contract Inventory (List (Single Item~)))
+;; part p0b
+
+;; Problem 1
+
+;; part p1
+(: inventory-map (-> (-> Item~ Item~) Inventory Inventory))
+(define (inventory-map f i) ...)
+;; part p1
+
+;; Problem 2
+
+;; part p2
+(: inventory-partition (-> (-> Item~ Boolean) Inventory (Tuple Inventory Inventory)))
+(define (inventory-partition p? i) ...)
+;; part p2
+
+
+;; Problem 3
+
+;; part p3
+(: inventory-get (-> (-> Item~ Boolean) Inventory (Tuple (Maybe (Single Item~)) Inventory)))
+(define (inventory-get p? i) ...)
+;; part p3
+
+
+;; Problem 4
+
+
+;; part p4
+(: craft-hammer (-> Inventory Inventory))
+(define (craft-hammer i) ...)
+;; part p4

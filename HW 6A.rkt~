@@ -1,0 +1,136 @@
+#lang lsl
+
+;; Problem 1
+
+;; part p1a
+(define-struct push [num])
+(define-struct add [])
+(define-struct mul [])
+(define-struct sub [])
+(define-contract SimpleInstr (OneOf (Push Integer) (Add) (Mul) (Sub)))
+
+(: simple-eval (-> (List Integer) (List SimpleInstr) (List Integer)))
+(define (simple-eval stk instrs)
+  (local [; stack-binop : [Integer Integer -> Integer] [List-of Integer]
+          ;               [List-of SimpleInstr] -> [List-of Integer]
+          ; evaluates a binary operator on top two numbers of stack, if present
+          (define (stack-binop op stk instrs)
+            (if (>= (length stk) 2)
+                (simple-eval (cons (op (first stk) (second stk))
+                            (rest (rest stk)))
+                      instrs)
+                (list)))
+
+          ; eval-instr : Instr [List-of Integer] [List-of SimpleInstr] -> [List-of Integer]
+          ; evaluates a single instruction, given a stack and rest of instructions
+          (define (eval-instr i stk instrs)
+            (cond [(add? i) (stack-binop + stk instrs)]
+                  [(mul? i) (stack-binop * stk instrs)]
+                  [(sub? i) (stack-binop - stk instrs)]
+                  [(push? i) (simple-eval (cons (push-num i) stk) instrs)]))]
+    (cond [(empty? instrs) stk]
+          [(cons? instrs) (eval-instr (first instrs) stk (rest instrs))])))
+;; part p1a
+
+;; part p1b
+(: simple-stack-verify (-> (List SimpleInstr) (List SimpleInstr) Boolean))
+(define (simple-stack-verify p1 p2)
+  (local [(define p1-out (simple-eval '() p1))
+          (define p2-out (simple-eval '() p2))]
+    (equal? p1-out p2-out)))
+
+
+(simple-eval '() (list (make-push 10) (make-push 20) (make-push 2) (make-mul) (make-add)))
+
+;; part p1b
+
+
+;; Problem 2
+
+;; part p2
+(: simple-const-fold (-> (List SimpleInstr) (List SimpleInstr)))
+(define (simple-const-fold p)
+  ...)
+
+;; part p2
+
+;; Problem 3
+
+;; part p3
+
+(define (simple-const-fold-prop ...) ...)
+
+;(check-contract simple-const-fold-prop)
+
+;; part p3
+
+;; Problem 4
+
+;; part p4a
+(define-struct var [name])
+(define-contract Instr (OneOf (Push Integer) (Add) (Mul) (Sub) (Var String)))
+
+(define-struct bind [name value])
+(define-contract Binding (Bind String Integer))
+
+
+(: eval (-> (List Binding) (List Integer) (List Instr) (List Integer)))
+; will return an empty list if it reaches an unbound variable, or a malformed
+; program (trying to do an operation without enough values on stack).
+(define (eval env stk instrs)
+  (local [; stack-binop : [Integer Integer -> Integer] [List-of Integer]
+          ;               [List-of Instr] -> [List-of Integer]
+          ; evaluates a binary operator on top two numbers of stack, if present
+          (define (stack-binop op stk instrs)
+            (if (>= (length stk) 2)
+                (eval env
+                      (cons (op (first stk) (second stk))
+                            (rest (rest stk)))
+                      instrs)
+                (list)))
+
+          ; lookup-var : String [List-of Binding] [List-of Integer]
+          ;              [List-of Instr] -> [List-of Integer]
+          (define (lookup-var name env stk instrs)
+            (cond [(empty? env) (list)]
+                  [(cons? env) (if (equal? name (bind-name (first env)))
+                                   (eval env
+                                         (cons (bind-value (first env))
+                                               stk)
+                                         instrs)
+                                   (lookup-var name (rest env) stk instrs))]))
+
+          ; eval-instr : Instr [List-of Integer] [List-of SimpleInstr] -> [List-of Integer]
+          ; evaluates a single instruction, given a stack and rest of instructions
+          (define (eval-instr i stk instrs)
+            (cond [(add? i) (stack-binop + stk instrs)]
+                  [(mul? i) (stack-binop * stk instrs)]
+                  [(sub? i) (stack-binop - stk instrs)]
+                  [(push? i) (eval env (cons (push-num i) stk) instrs)]
+                  [(var? i) (lookup-var (var-name i) env stk instrs)]))]
+    (cond [(empty? instrs) stk]
+          [(cons? instrs) (eval-instr (first instrs) stk (rest instrs))])))
+;; part p4a
+
+;; Your first task is to first define an updated version of `simple-stack-verify`.
+;; This time it will take a substitution (set of variable bindings) that it
+;; can pass to `eval`.
+
+;; part p4b
+(: stack-verify (-> (List Binding) (List Instr) (List Instr) Boolean))
+(define (stack-verify env p1 p2) ...)
+
+;; part p4b
+
+;; part p4c
+(: const-fold (-> (List Instr) (List Instr)))
+(define (const-fold p) ...)
+;; part p4c
+
+;; part p4d
+
+(define (const-fold-prop ...) ...)
+
+;(check-contract const-fold-prop)
+
+;; part p4d

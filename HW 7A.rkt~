@@ -1,0 +1,63 @@
+#lang lsl
+
+;; part p1a
+(define EMPTY 'empty)
+(define WALL 'wall)
+(define PLAYER 'player)
+(define EXIT 'exit)
+
+(define-contract Cell (OneOf (Constant EMPTY)
+                             (Constant WALL)
+                             (Constant PLAYER)
+                             (Constant EXIT)))
+;; part p1a
+
+
+;; part p1b
+(define-struct posn (x y))
+(define-struct at (c pos))
+
+(define-contract Posn~ (Posn Natural Natural))
+
+(define-contract Maze (List (At Cell Posn~)))
+;; part p1b
+
+;; part p1c
+(define-contract SExp (OneOf Symbol
+                             Integer
+                             Boolean
+                             String
+                             (List SExp)))
+;; part p1c
+
+;; part p3
+(define-struct invalid-sexp (sexp))
+;; part p3
+
+;; Problem 1
+
+
+;; Problem 2
+
+
+;; Problem 3
+
+
+;; Problem 4
+
+
+;; Problem 5
+
+
+;; Problem 6
+
+
+;; Problem 7
+
+
+;; Problem 8
+
+
+;; part p8a
+(define-contract (Maybe T) (OneOf T (Constant #f)))
+;; part p8a

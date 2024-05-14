@@ -1,0 +1,107 @@
+#lang lsl
+
+;; Problem 1
+;; Define the state for the "a" process
+
+;; part p1
+(define-contract AState False)
+;; part p1
+
+;; Problem 2
+;; Define handlers for the "a" process
+
+;; part p2
+(: a-start (-> (List String) (Action AState)))
+(define (a-start others)
+  (Action #f (list (send-packet "b" "hello"))))
+
+(test-suite
+ "a-start"
+ ...)
+
+(: a-receive (-> AState (ReceivePacket String) (Action AState)))
+(define (a-receive st pkt)
+  ...)
+
+(test-suite
+ "a-receive"
+ ...)
+;; part p2
+
+;; Problem 3
+;; Define state for the "b" process
+
+;; part p3
+(define-contract BState ...)
+;; part p3
+
+;; Problem 4
+;; Define handlers for the "b" process
+
+;; part p4
+(: b-start (-> (List String) (Action BState)))
+(define (b-start others)
+  ...)
+
+(test-suite
+ "b-start"
+ ...)
+
+(: b-receive (-> BState (ReceivePacket String) (Action BState)))
+(define (b-receive st pkt)
+  ...)
+
+(test-suite
+ "b-receive"
+ ...)
+;; part p4
+
+;; Problem 5
+;; Define state for the "c" process
+
+;; part p5
+(define-contract CState ...)
+;; part p5
+
+;; Problem 6
+;; Define handlers for the "c" process
+
+;; part p6
+(: c-start (-> (List String) (Action CState)))
+(define (c-start others)
+  ...)
+
+(test-suite
+ "c-start"
+ ...)
+
+(: c-receive (-> CState (ReceivePacket String) (Action CState)))
+(define (c-receive st pkt)
+  ...)
+
+(test-suite
+ "c-receive"
+ ...)
+;; part p6
+
+;; Problem 7
+;; Define all the processes using the handlers above:
+
+;; part p7
+(define a-process ...)
+(define b-process ...)
+(define c-process ...)
+;; part p7
+
+;; Problem 8
+;;
+;; Define two functions, main and main-debug, that run the program using start
+;; and start-debug respectively. You can use `first` as the scheduler for both.
+
+;; part p8
+(define (main)
+  (start ...))
+
+(define (main-debug)
+  (start-debug ...))
+;; part p8
